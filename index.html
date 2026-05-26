@@ -167,7 +167,7 @@
       <div>🅿 <b>Slot:</b> ${car.slot}</div>
       <div>📅 <b>Date:</b> ${formatDate(car.timeIn)}</div>
       <div>⏰ <b>Time In:</b> ${formatTime(car.timeIn)}</div>
-      <div style="font-size:.75rem; color:#718096; margin-top:6px;">Rate: 300 RWF/hr</div>
+      <div style="font-size:.75rem; color:#718096; margin-top:6px;">Rate: 500 RWF/hr · Extra: 300 RWF/hr</div>
     `;
     document.getElementById("tokenBox").style.display = "block";
   }
@@ -182,7 +182,8 @@
       <div class="row"><span>Time Out</span><span>${formatTime(r.timeOut)}</span></div>
       <div class="row"><span>Duration</span><span>${r.totalHours}h (${r.totalMins} min)</span></div>
       <hr class="divider" />
-      <div class="row"><span>${r.totalHours}h × 300 RWF</span><span>${r.amount} RWF</span></div>
+      <div class="row"><span>First hour</span><span>500 RWF</span></div>
+      ${r.totalHours > 1 ? `<div class="row"><span>Extra ${r.totalHours - 1}h × 300 RWF</span><span>${(r.totalHours - 1) * 300} RWF</span></div>` : ""}
       <div class="row total"><span>TOTAL</span><span>${r.amount} RWF</span></div>
     `;
     document.getElementById("receiptOverlay").classList.add("show");

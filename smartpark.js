@@ -1,7 +1,8 @@
 
 
 const MAX_SLOTS = 50;
-const RATE_NORMAL = 300;   // RWF per hour
+const RATE_NORMAL = 500;   // RWF per hour
+const RATE_EXTRA  = 300;   // RWF per extra hour
 
 //Sparse array: index = slot number (0-based), value = car object or null
 const carPark = new Array(MAX_SLOTS).fill(null);
@@ -67,7 +68,9 @@ function calculateBill(timeIn, timeOut) {
   const totalHours = Math.ceil(totalMins / 60);          // round up to next hour
 
   const billableHours = Math.max(1, totalHours);  // minimum 1 hour
-  const amount = billableHours * RATE_NORMAL;
+  const amount = billableHours <= 1
+    ? RATE_NORMAL
+    : RATE_NORMAL + (billableHours - 1) * RATE_EXTRA;
 
   return { totalMins, totalHours: billableHours, amount };
 }
