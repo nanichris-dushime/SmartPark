@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartPark – Rubavu District</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div>
+    <h1>🅿 SmartPark</h1>
+    <p>Rubavu District · Automated Car Parking Management System</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── Stats ── -->
+  <div class="stats">
+    <div class="stat-card total">
+      <div class="value" id="statTotal">50</div>
+      <div class="label">Total Slots</div>
+    </div>
+    <div class="stat-card occupied">
+      <div class="value" id="statOccupied">0</div>
+      <div class="label">Occupied</div>
+    </div>
+    <div class="stat-card free">
+      <div class="value" id="statFree">50</div>
+      <div class="label">Available</div>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- ── Add Car Form ── -->
+    <div class="card">
+      <h2>🚗 Enter Car</h2>
+      <form id="enterForm" novalidate>
+        <div class="form-group">
+          <label for="plateInput">Number Plate</label>
+          <input type="text" id="plateInput" placeholder="e.g. RAC 123 A" maxlength="15" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Assign Parking Slot</button>
+      </form>
+      <div class="alert" id="enterAlert"></div>
+
+      <!-- Token preview -->
+      <div id="tokenBox" style="display:none; margin-top:18px; border:1.5px dashed #2b6cb0; border-radius:8px; padding:14px; font-size:.83rem; background:#ebf4ff;">
+        <strong style="color:#2b6cb0;">🎫 Parking Token</strong>
+        <div id="tokenContent" style="margin-top:8px; line-height:1.8;"></div>
+      </div>
+    </div>
+
+    <!-- ── Parking Table ── -->
+    <div class="card">
+      <h2>📋 Current Parking Status</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Slot</th>
+              <th>Number Plate</th>
+              <th>Date</th>
+              <th>Time In</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="parkingTable">
+            <tr><td colspan="7" class="empty">No cars currently parked.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert" id="removeAlert"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Receipt Modal ── -->
+<div class="overlay" id="receiptOverlay">
+  <div class="receipt">
+    <h3>🅿 SmartPark Receipt</h3>
+    <p style="font-size:.78rem; color:#718096;">Rubavu District</p>
+    <hr class="divider" />
+    <div id="receiptBody"></div>
+    <button class="btn-close" onclick="closeReceipt()">Close</button>
+  </div>
+</div>
+
+<script src="smartpark.js"></script>
+<script>
+  // ── Init ──────────────────────────────────────────────────────────────────
+  createCarPark();
+  renderTable();
+
+  // Refresh elapsed time every 30 s
+  setInterval(renderTable, 30000);
+
+  // ── Enter car ─────────────────────────────────────────────────────────────
+  document.getElementById("enterForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const plate = document.getElementById("plateInput").value;
+    const result = enterCar(plate);
+    showAlert("enterAlert", result.msg, result.ok ? "success" : "error");
+
+    if (result.ok) {
+      showToken(carPark[result.slot - 1]);
+      document.getElementById("plateInput").value = "";
+      renderTable();
+      updateStats();
+    }
+  });
+
+  // ── Remove car ────────────────────────────────────────────────────────────
+  function handleRemove(plate) {
+    const result = removeCar(plate);
+    if (!result.ok) {
+      showAlert("removeAlert", result.msg, "error");
+      return;
+    }
+    showReceipt(result);
+    renderTable();
+    updateStats();
+  }
+
+  // ── Render table ──────────────────────────────────────────────────────────
+  function renderTable() {
+    const tbody = document.getElementById("parkingTable");
+    const cars  = getAllCars();
+
+    if (cars.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty">No cars currently parked.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = cars.map(car => `
+      <tr>
+        <td><strong>${car.slot}</strong></td>
+        <td>${car.plate}</td>
+        <td>${formatDate(car.timeIn)}</td>
+        <td>${formatTime(car.timeIn)}</td>
+        <td>${elapsed(car.timeIn)}</td>
+        <td><span class="badge badge-green">Parked</span></td>
+        <td>
+          <button class="btn btn-danger" onclick="handleRemove('${car.plate}')">Exit &amp; Pay</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  function updateStats() {
+    document.getElementById("statOccupied").textContent = occupiedCount;
+    document.getElementById("statFree").textContent     = MAX_SLOTS - occupiedCount;
+  }
+
+  // ── Token display ─────────────────────────────────────────────────────────
+  function showToken(car) {
+    document.getElementById("tokenContent").innerHTML = `
+      <div>🚗 <b>Plate:</b> ${car.plate}</div>
+      <div>🅿 <b>Slot:</b> ${car.slot}</div>
+      <div>📅 <b>Date:</b> ${formatDate(car.timeIn)}</div>
+      <div>⏰ <b>Time In:</b> ${formatTime(car.timeIn)}</div>
+      <div style="font-size:.75rem; color:#718096; margin-top:6px;">Rate: 300 RWF/hr · Extra: 500 RWF/hr</div>
+    `;
+    document.getElementById("tokenBox").style.display = "block";
+  }
+
+  // ── Receipt modal ─────────────────────────────────────────────────────────
+  function showReceipt(r) {
+    document.getElementById("receiptBody").innerHTML = `
+      <div class="row"><span>Plate</span><span>${r.car.plate}</span></div>
+      <div class="row"><span>Slot</span><span>${r.car.slot}</span></div>
+      <div class="row"><span>Date</span><span>${formatDate(r.car.timeIn)}</span></div>
+      <div class="row"><span>Time In</span><span>${formatTime(r.car.timeIn)}</span></div>
+      <div class="row"><span>Time Out</span><span>${formatTime(r.timeOut)}</span></div>
+      <div class="row"><span>Duration</span><span>${r.totalHours}h (${r.totalMins} min)</span></div>
+      <hr class="divider" />
+      <div class="row"><span>First hour</span><span>300 RWF</span></div>
+      ${r.totalHours > 1 ? `<div class="row"><span>Extra ${r.totalHours - 1}h × 500</span><span>${(r.totalHours - 1) * 500} RWF</span></div>` : ""}
+      <div class="row total"><span>TOTAL</span><span>${r.amount} RWF</span></div>
+    `;
+    document.getElementById("receiptOverlay").classList.add("show");
+  }
+
+  function closeReceipt() {
+    document.getElementById("receiptOverlay").classList.remove("show");
+  }
+
+  // ── Alert helper ──────────────────────────────────────────────────────────
+  function showAlert(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className   = `alert ${type}`;
+    el.style.display = "block";
+    setTimeout(() => { el.style.display = "none"; }, 4000);
+  }
+</script>
+</body>
+</html>
