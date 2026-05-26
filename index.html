@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<!-- ── Header ── -->
+
 <header>
   <div>
     <h1>🅿 SmartPark</h1>
@@ -18,7 +18,7 @@
 
 <div class="container">
 
-  <!-- ── Stats ── -->
+  
   <div class="stats">
     <div class="stat-card total">
       <div class="value" id="statTotal">50</div>
@@ -36,7 +36,7 @@
 
   <div class="layout">
 
-    <!-- ── Add Car Form ── -->
+    
     <div class="card">
       <h2>🚗 Enter Car</h2>
       <form id="enterForm" novalidate>
@@ -48,14 +48,14 @@
       </form>
       <div class="alert" id="enterAlert"></div>
 
-      <!-- Token preview -->
+     
       <div id="tokenBox" style="display:none; margin-top:18px; border:1.5px dashed #2b6cb0; border-radius:8px; padding:14px; font-size:.83rem; background:#ebf4ff;">
         <strong style="color:#2b6cb0;">🎫 Parking Token</strong>
         <div id="tokenContent" style="margin-top:8px; line-height:1.8;"></div>
       </div>
     </div>
 
-    <!-- ── Parking Table ── -->
+    
     <div class="card">
       <h2>📋 Current Parking Status</h2>
       <div class="table-wrap">
@@ -95,14 +95,14 @@
 
 <script src="smartpark.js"></script>
 <script>
-  // ── Init ──────────────────────────────────────────────────────────────────
+  
   createCarPark();
   renderTable();
 
-  // Refresh elapsed time every 30 s
+  //Refresh elapsed time every 30 s
   setInterval(renderTable, 30000);
 
-  // ── Enter car ─────────────────────────────────────────────────────────────
+  //Enter car 
   document.getElementById("enterForm").addEventListener("submit", function (e) {
     e.preventDefault();
     const plate = document.getElementById("plateInput").value;
@@ -117,7 +117,7 @@
     }
   });
 
-  // ── Remove car ────────────────────────────────────────────────────────────
+  //Remove car
   function handleRemove(plate) {
     const result = removeCar(plate);
     if (!result.ok) {
@@ -129,7 +129,7 @@
     updateStats();
   }
 
-  // ── Render table ──────────────────────────────────────────────────────────
+  //Render table
   function renderTable() {
     const tbody = document.getElementById("parkingTable");
     const cars  = getAllCars();
@@ -154,13 +154,13 @@
     `).join("");
   }
 
-  // ── Stats ─────────────────────────────────────────────────────────────────
+  //Stats 
   function updateStats() {
     document.getElementById("statOccupied").textContent = occupiedCount;
     document.getElementById("statFree").textContent     = MAX_SLOTS - occupiedCount;
   }
 
-  // ── Token display ─────────────────────────────────────────────────────────
+  //Token display
   function showToken(car) {
     document.getElementById("tokenContent").innerHTML = `
       <div>🚗 <b>Plate:</b> ${car.plate}</div>
@@ -172,7 +172,7 @@
     document.getElementById("tokenBox").style.display = "block";
   }
 
-  // ── Receipt modal ─────────────────────────────────────────────────────────
+  //Receipt modal
   function showReceipt(r) {
     document.getElementById("receiptBody").innerHTML = `
       <div class="row"><span>Plate</span><span>${r.car.plate}</span></div>
@@ -193,7 +193,7 @@
     document.getElementById("receiptOverlay").classList.remove("show");
   }
 
-  // ── Alert helper ──────────────────────────────────────────────────────────
+  //Alert helper
   function showAlert(id, msg, type) {
     const el = document.getElementById(id);
     el.textContent = msg;
