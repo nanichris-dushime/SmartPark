@@ -182,8 +182,7 @@
       <div class="row"><span>Time Out</span><span>${formatTime(r.timeOut)}</span></div>
       <div class="row"><span>Duration</span><span>${r.totalHours}h (${r.totalMins} min)</span></div>
       <hr class="divider" />
-      <div class="row"><span>First hour</span><span>300 RWF</span></div>
-      ${r.totalHours > 1 ? `<div class="row"><span>Extra ${r.totalHours - 1}h × 500</span><span>${(r.totalHours - 1) * 500} RWF</span></div>` : ""}
+      <div class="row"><span>${r.totalHours}h × 300 RWF</span><span>${r.amount} RWF</span></div>
       <div class="row total"><span>TOTAL</span><span>${r.amount} RWF</span></div>
     `;
     document.getElementById("receiptOverlay").classList.add("show");
